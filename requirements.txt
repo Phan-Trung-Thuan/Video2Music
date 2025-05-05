@@ -1,4 +1,4 @@
-python==3.11
+python==3.7
 torch
 torchvision
 clip @ git+https://github.com/openai/CLIP.git
