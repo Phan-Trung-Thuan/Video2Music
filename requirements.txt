@@ -19,7 +19,7 @@ pretty_midi==0.2.9
 pydub==0.25.1
 regex==2022.10.31
 scenedetect==0.6.1
-scikit_learn==1.0.2
+scikit_learn
 scipy==1.7.3
 gradio==4.7.1
 pytube==15.0.0
