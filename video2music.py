@@ -1,4 +1,3 @@
-import gradio as gr
 from pathlib import Path
 
 import torch
@@ -30,8 +29,6 @@ import time
 
 from tqdm import tqdm
 from huggingface_hub import snapshot_download
-
-from gradio import Markdown
 
 from pytube import YouTube
 
