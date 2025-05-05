@@ -1,5 +1,5 @@
-torch==1.12.1
-torchvision==0.13.1
+torch
+torchvision
 clip @ git+https://github.com/openai/CLIP.git
 Cython==3.0.5
 numpy==1.21.2
