@@ -21,7 +21,8 @@ class TransformerDecoderRPR(Module):
         self.num_layers = num_layers
         self.norm = norm
         
-    def forward(self, tgt, memory, tgt_mask=None, memory_mask=None, tgt_key_padding_mask=None, memory_key_padding_mask=None):
+    def forward(self, tgt, memory, tgt_mask=None, memory_mask=None, tgt_key_padding_mask=None, memory_key_padding_mask=None,
+                **kwargs):
         output = tgt
         for mod in self.layers:
             output = mod(output, memory, tgt_mask=tgt_mask,
@@ -53,7 +54,8 @@ class TransformerDecoderLayerRPR(Module):
         self.dropout3 = Dropout(dropout)
         
     def forward(self, tgt, memory, tgt_mask=None, memory_mask=None,
-                tgt_key_padding_mask=None, memory_key_padding_mask=None):
+                tgt_key_padding_mask=None, memory_key_padding_mask=None,
+                **kwargs):
         tgt2 = self.self_attn(tgt, tgt, tgt, attn_mask=tgt_mask,
                               key_padding_mask=tgt_key_padding_mask)[0]
         tgt = tgt + self.dropout1(tgt2)
