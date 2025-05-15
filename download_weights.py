@@ -18,7 +18,8 @@ print("Downloading best_rmse_weights.pickle...")
 gdown.download(url, output_pickle, quiet=False)
 
 # Download Soundfont
-soundfont_file_id = "1KmI9stB-Jlvozbbj2N_X2oII5ENiRvLe"
+# soundfont_file_id = "1KmI9stB-Jlvozbbj2N_X2oII5ENiRvLe"     # Kang's soundfont (error)
+soundfont_file_id = "1IqDUf4dmPCwTzEIdYKduIscxxHcIKko1"       # Our piano soundfont
 url = f"https://drive.google.com/uc?id={id_trans}"
 file_name = "C:\Windows\System32\Video2Music\soundfonts/default_sound_font.sf2"
 print("Downloading default_sound_font.sf2...")
