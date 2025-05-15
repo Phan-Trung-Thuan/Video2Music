@@ -16,3 +16,10 @@ output_pickle = "C:\Windows\System32\Video2Music\saved_models\AMT/best_rmse_weig
 
 print("Downloading best_rmse_weights.pickle...")
 gdown.download(url, output_pickle, quiet=False)
+
+# Download Soundfont
+soundfont_file_id = "1KmI9stB-Jlvozbbj2N_X2oII5ENiRvLe"
+url = f"https://drive.google.com/uc?id={id_trans}"
+file_name = "C:\Windows\System32\Video2Music\soundfonts/default_sound_font.sf2"
+print("Downloading default_sound_font.sf2...")
+gdown.download(url, file_name, quiet=False)
