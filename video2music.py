@@ -112,7 +112,7 @@ def gen_semantic_feature(frame_dir, semantic_dir):
         np.save(output_path, features)
     else:
         features = torch.FloatTensor(len(sorted_file_names), 768).fill_(0)
-        for idx, file_name in enumerate(sorted_file_names):
+        for idx, file_name in tqdm(enumerate(sorted_file_names)):
             fpath = frame_dir / file_name
             image = preprocess(Image.open(fpath)).unsqueeze(0).to(device)          
             with torch.no_grad():
@@ -131,7 +131,7 @@ def gen_emotion_feature(frame_dir, emotion_dir):
     output_path = emotion_dir / "emotion.lab" 
 
     emolist = []
-    for file_name in sorted_file_names:
+    for file_name in tqdm(sorted_file_names):
         fpath = frame_dir / file_name
         image = preprocess(Image.open(fpath)).unsqueeze(0).to(device)                
         with torch.no_grad():  
@@ -424,10 +424,14 @@ class Video2music:
         note_density_dir.mkdir(parents=True)
 
         split_video_into_frames(video, frame_dir)
+        print("Creating Semantic features...")
         gen_semantic_feature(frame_dir, semantic_dir)
+        print("Creating Emotion features...")
         gen_emotion_feature(frame_dir, emotion_dir)
+        print("Creating Scene offset features...")
         gen_scene_feature(video, scene_dir, frame_dir)
         gen_scene_offset_feature(scene_dir, scene_offset_dir)
+        print("Creating Motion features...")
         gen_motion_feature(video, motion_dir)
 
         feature_scene_offset = get_scene_offset_feature(scene_offset_dir)
@@ -614,7 +618,8 @@ class Video2music:
             midi_chords = voice(midi_chords_orginal)
             trans = traspose_key_dic[key]
 
-            for i, chord in enumerate(midi_chords):
+            print("Creating MIDI...")
+            for i, chord in tqdm(enumerate(midi_chords)):
                 if densitylist[i] == 0:
                     if len(chord) >= 4:
                         if chord_offsetlist[i] % 2 == 0:
