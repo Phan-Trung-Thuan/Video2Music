@@ -102,7 +102,7 @@ def gen_semantic_feature(frame_dir, semantic_dir):
         features = torch.FloatTensor(len(sorted_file_names), 768).fill_(0)
         features = features.to(device)
         
-        for idx, file_name in enumerate(sorted_file_names):
+        for idx, file_name in tqdm(enumerate(sorted_file_names)):
             fpath = frame_dir / file_name
             image = preprocess(Image.open(fpath)).unsqueeze(0).to(device)          
             with torch.no_grad():
@@ -164,7 +164,7 @@ def gen_scene_feature(video, scene_dir, frame_dir):
 
     sec = 0
     scenedict = {}
-    for idx, scene in enumerate(scene_list):
+    for idx, scene in tqdm(enumerate(scene_list)):
         end_int = math.ceil(scene[1].get_seconds())
         for s in range (sec, end_int):
             scenedict[s] = str(idx)
@@ -352,6 +352,7 @@ class Video2music:
         device="cuda:0",
         cache_dir=None,
         local_files_only=False,
+        sf2_file="soundfonts/default_sound_font.sf2",
     ):
         # path = snapshot_download(repo_id=name, cache_dir=cache_dir)
 
@@ -384,7 +385,7 @@ class Video2music:
         self.model.eval()
         self.modelReg.eval()
 
-        self.SF2_FILE = "soundfonts/default_sound_font.sf2"
+        self.SF2_FILE = sf2_file
 
     def generate(self, video, primer, key):
 
