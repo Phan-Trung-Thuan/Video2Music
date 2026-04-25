@@ -41,6 +41,7 @@ import pandas as pd
 
 from utilities.argument_generate_funcs import parse_generate_args, print_generate_args
 from utilities.device import get_device, use_cuda
+import torch.nn.functional as F
 
 all_key_names = ['C major', 'G major', 'D major', 'A major',
                  'E major', 'B major', 'F major', 'Bb major',
@@ -119,6 +120,26 @@ min_loudness = 0  # Minimum loudness level in the input range
 max_loudness = 50  # Maximum loudness level in the input range
 min_velocity = 49  # Minimum velocity value in the output range
 max_velocity = 112  # Maximum velocity value in the output range
+
+def find_longest_flac_file(flac_files):
+    if not flac_files:
+        return None
+
+    max_duration = 0
+    longest_file = None
+
+    for file_path in flac_files:
+        try:
+            audio = AudioSegment.from_file(file_path)
+            duration = len(audio)
+            if duration > max_duration:
+                max_duration = duration
+                longest_file = file_path
+        except Exception as e:
+            print(f"Error loading file {file_path}: {e}")
+
+    return longest_file
+
 
 def split_video_into_frames(video, frame_dir):
     output_path = os.path.join(frame_dir, f"%03d.jpg")
@@ -462,6 +483,7 @@ def addChord(midifile, chord, chord_offset, density_val, trans_val, time, durati
         trans_val += 1
     else:                         # Neutral
         trans_val += 0
+    trans_val = 0  # FLAG
     
     # Inner Chord Notes
     first_velo = 1.1
@@ -795,6 +817,19 @@ class Video2music:
         # self.model.eval()
         # self.modelReg.eval()
 
+        os.makedirs('logs', exist_ok=True)
+        np.save("logs/feature_emotion_before.npy", feature_emotion.cpu().numpy())
+        # feature_emotion = feature_emotion.permute(0, 2, 1)
+        # window_size = 5
+        # avg_kernel = torch.ones(1, 1, window_size).to(get_device()) / window_size
+        # feature_emotion = torch.nn.functional.conv1d(feature_emotion, avg_kernel, padding=window_size//2)
+        # feature_emotion = feature_emotion.permute(0, 2, 1)
+        feature_emotion = feature_emotion.permute(0, 2, 1)  # (1, 6, 300)       
+        window_size = 5
+        avg_kernel = torch.ones(6, 1, window_size).to(get_device()) / window_size
+        feature_emotion = torch.nn.functional.conv1d(feature_emotion, avg_kernel, padding=window_size//2, groups=6)        
+        feature_emotion = feature_emotion.permute(0, 2, 1) # (1, 300, 6)        
+
         with torch.set_grad_enabled(False):
             chord_sequence = self.model.generate(feature_semantic_list=feature_semantic_list, 
                                               feature_key=feature_key, 
@@ -978,13 +1013,21 @@ class Video2music:
                         fs.midi_to_audio(str(f_path_midi_instrument), str(flac_output))
                         flac_files.append(flac_output)
 
-                # base_audio_index = 5
-                # mixed = AudioSegment.from_file(flac_files[base_audio_index])
-                mixed = AudioSegment.from_file(flac_files[0])
-                for i, audio_path in enumerate(flac_files):
-                    # if base_audio_index == i:
-                        # continue
-                    mixed = mixed.overlay(AudioSegment.from_file(audio_path))
+                # # base_audio_index = 5
+                # # mixed = AudioSegment.from_file(flac_files[base_audio_index])
+                # mixed = AudioSegment.from_file(flac_files[0])
+                # for i, audio_path in enumerate(flac_files):
+                #     # if base_audio_index == i:
+                #         # continue
+                #     mixed = mixed.overlay(AudioSegment.from_file(audio_path))
+                # mixed.export(f_path_flac, format="flac")
+
+                # Find the longest FLAC file
+                longest_flac = find_longest_flac_file(flac_files)
+                mixed = AudioSegment.from_file(longest_flac)
+                for audio_path in flac_files:
+                    if audio_path != longest_flac:
+                        mixed = mixed.overlay(AudioSegment.from_file(audio_path))
                 mixed.export(f_path_flac, format="flac")
 
             # Render generated music into input video
@@ -992,7 +1035,13 @@ class Video2music:
             video_mp = mp.VideoFileClip(str(video))
 
             assert video_mp.duration > 0 and audio_mp.duration > 0
-            audio_mp = audio_mp.subclip(0, video_mp.duration)
+            ###
+            clip_duration = min(video_mp.duration, audio_mp.duration)
+            audio_mp = audio_mp.subclip(0, clip_duration)
+            ###            
+            ###
+            # audio_mp = audio_mp.subclip(0, video_mp.duration)
+            ###
             final = video_mp.set_audio(audio_mp)
 
             final.write_videofile(str(f_path_video_out), 
