@@ -5,19 +5,19 @@ version = VERSION
 rpr = True
 augmentation = False
 chord_embed = True
-music_gen_version = '2.2'
-batch_size = 24
+music_gen_version = '1.2.3'
+batch_size = 32
 epochs = 50
-motion_type = 1
+motion_type = 2
 split_ver = SPLIT_VER
 split_path = "split_" + split_ver
 dropout = 0.2
 droptoken = 0.0
 lr = None
-optimizer = 'RAdamW' # Adam / AdamW / RAdam / RAdamW / Lion
-auxiliary_loss = True # False / True
-drop_loss = True # False / True
-balancing = True # True / False
+optimizer = 'AdamW' # Adam / AdamW / RAdam / RAdamW / Lion
+auxiliary_loss = False # False / True
+drop_loss = False # False / True
+balancing = False # True / False
 
 def parse_train_args():
     parser = argparse.ArgumentParser()
